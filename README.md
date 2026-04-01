@@ -133,21 +133,18 @@ Sin body. Usa `cost_usd` del libro, tasa USD→moneda local y guarda `selling_pr
 
 ---
 
-## Docker (opcional)
+## Docker
 
-Si tienes **Docker Desktop** en ejecución, puedes levantar API y Postgres juntos:
+Con **Docker Desktop** abierto, en la raíz del proyecto:
 
 ```sh
 docker compose up --build
 ```
 
 - API: **http://localhost:3000** — Swagger: **http://localhost:3000/api/docs**
-- Postgres expuesto en el host en el puerto **5434** (usuario / contraseña / base: `bookstore` / `bookstore` / `bookstore`), según `docker-compose.yml`.
+- Postgres en el host: **localhost:5434** (`bookstore` / `bookstore`, base `bookstore`)
 
-En segundo plano: `docker compose up --build -d`  
-Detener: `docker compose down`
-
-Si ves error de conexión al “pipe” de Docker, el motor no está arrancado: abre Docker Desktop y espera a que esté listo.
+Segundo plano: `docker compose up --build -d` · Detener: `docker compose down`
 
 ---
 
