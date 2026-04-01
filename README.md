@@ -1,98 +1,168 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Bookstore Inventory API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST con **NestJS** para inventario de librerías: CRUD de libros (baja lógica), búsqueda por categoría, stock bajo y cálculo de precio de venta con tipo de cambio **USD → moneda local** (según país proveedor) y margen del **40 %**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Cómo ejecutarlo (local)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Desde la raíz del repositorio:
 
-## Project setup
-
-```bash
-$ npm install
+```sh
+npm install
 ```
 
-## Compile and run the project
+1. **PostgreSQL:** crea una base de datos (por ejemplo `bookstore`) y anota usuario, contraseña, host y puerto.
+2. **Variables de entorno:** copia `.env.example` → `.env`  
+   - PowerShell: `Copy-Item .env.example .env`  
+   - CMD: `copy .env.example .env`
+3. En `.env`, ajusta **`DATABASE_URL`** para que apunte a tu Postgres (formato abajo). Opcional: `PORT` (por defecto **3000**), `FALLBACK_RATES_JSON` si quieres tasas de respaldo cuando falle la API de cambio.
+4. Arranca la API en modo desarrollo:
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```sh
+npm run start:dev
 ```
 
-## Run tests
+La API queda en **http://localhost:3000** (o el `PORT` de tu `.env`).
 
-```bash
-# unit tests
-$ npm run test
+En **desarrollo** (`NODE_ENV=development`), TypeORM crea o actualiza las tablas al arrancar (`synchronize`). En **producción** no: se usan **migraciones** y se aplican al iniciar (`migrationsRun`). Para ejecutar migraciones a mano tras un `npm run build`: `npm run migration:run`.
 
-# e2e tests
-$ npm run test:e2e
+---
 
-# test coverage
-$ npm run test:cov
+## Requisitos previos
+
+| Requisito | Detalle |
+|-----------|---------|
+| **Node.js** | 22.x (LTS) recomendado |
+| **npm** | Incluido con Node |
+| **PostgreSQL** | 16+ accesible desde tu máquina (instalación local, servicio en red, etc.) |
+| **Docker Desktop** | Opcional; solo si quieres levantar API + Postgres con `docker compose` |
+
+---
+
+## Variables de entorno
+
+| Archivo | Origen | Propósito |
+|---------|--------|-----------|
+| `.env` | `.env.example` | Conexión a Postgres (`DATABASE_URL`), puerto, CORS en prod (`CLIENT_URL`), URL y respaldo de tasas (`EXCHANGE_RATE_API_URL`, `FALLBACK_RATES_JSON`). |
+
+`DATABASE_URL` debe seguir este formato:
+
+`postgresql://USUARIO:CONTRASEÑA@HOST:PUERTO/NOMBRE_BD`
+
+Ejemplo si Postgres escucha en tu PC en el puerto estándar:
+
+`postgresql://postgres:tu_password@localhost:5432/bookstore`
+
+Puedes crear la base con la herramienta que uses; ejemplo en `psql`:
+
+```sql
+CREATE DATABASE bookstore;
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Documentación de API (Swagger)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Con el API en marcha, la documentación interactiva **OpenAPI (Swagger)** está en:
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+**http://localhost:3000/api/docs**
+
+(Cambia host o puerto si modificaste `PORT` en `.env`.)
+
+Ahí ves rutas, esquemas y puedes probar los endpoints.
+
+---
+
+## Ejemplos de uso de los endpoints
+
+Base URL local: **http://localhost:3000**  
+Los cuerpos JSON van en **camelCase** (DTOs de Nest).
+
+| Método | Ruta | Body |
+|--------|------|------|
+| `POST` | `/books` | JSON crear libro |
+| `GET` | `/books` | Opcional: `?page=1&perPage=20` |
+| `GET` | `/books/:id` | — |
+| `PUT` | `/books/:id` | JSON parcial o completo |
+| `DELETE` | `/books/:id` | — (baja lógica) |
+| `GET` | `/books/search?category=texto` | — |
+| `GET` | `/books/low-stock?threshold=10` | — |
+| `POST` | `/books/:id/calculate-price` | — |
+
+### Crear libro
+
+`POST http://localhost:3000/books`  
+`Content-Type: application/json`
+
+```json
+{
+  "title": "El Quijote",
+  "author": "Miguel de Cervantes",
+  "isbn": "978-84-376-0494-7",
+  "costUsd": 15.99,
+  "stockQuantity": 25,
+  "category": "Literatura Clásica",
+  "supplierCountry": "ES"
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Actualizar libro
 
-## Resources
+`PUT http://localhost:3000/books/1`  
+`Content-Type: application/json`
 
-Check out a few resources that may come in handy when working with NestJS:
+```json
+{
+  "title": "Kafka en la orilla",
+  "author": "Haruki Murakami",
+  "isbn": "9780099491439",
+  "costUsd": 24.5,
+  "sellingPriceLocal": null,
+  "stockQuantity": 12,
+  "category": "Ficción",
+  "supplierCountry": "JP"
+}
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Calcular precio de venta
 
-## Support
+`POST http://localhost:3000/books/1/calculate-price`  
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Sin body. Usa `cost_usd` del libro, tasa USD→moneda local y guarda `selling_price_local`. Si falla la API externa, entra en juego `FALLBACK_RATES_JSON`.
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Docker (opcional)
 
-## License
+Si tienes **Docker Desktop** en ejecución, puedes levantar API y Postgres juntos:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```sh
+docker compose up --build
+```
+
+- API: **http://localhost:3000** — Swagger: **http://localhost:3000/api/docs**
+- Postgres expuesto en el host en el puerto **5434** (usuario / contraseña / base: `bookstore` / `bookstore` / `bookstore`), según `docker-compose.yml`.
+
+En segundo plano: `docker compose up --build -d`  
+Detener: `docker compose down`
+
+Si ves error de conexión al “pipe” de Docker, el motor no está arrancado: abre Docker Desktop y espera a que esté listo.
+
+---
+
+## Colección Postman
+
+En `postman/` puedes versionar la colección exportada desde Postman (por ejemplo `bookstore-inventory-api.postman_collection.json`).
+
+---
+
+## Scripts útiles
+
+| Comando | Descripción |
+|---------|-------------|
+| `npm run start:dev` | Desarrollo con recarga |
+| `npm run build` | Compilar |
+| `npm run start:prod` | Ejecutar `dist/main.js` |
+| `npm run migration:run` | Aplicar migraciones (tras `build`) |
+| `npm run migration:revert` | Revertir última migración |
