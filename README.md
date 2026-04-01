@@ -40,6 +40,21 @@ En **desarrollo** (`NODE_ENV=development`), TypeORM crea o actualiza las tablas 
 
 ---
 
+## Docker
+
+Con **Docker Desktop** abierto, en la raíz del proyecto:
+
+```sh
+docker compose up --build
+```
+
+- API: **http://localhost:3000** — Swagger: **http://localhost:3000/api/docs**
+- Postgres en el host: **localhost:5434** (`bookstore` / `bookstore`, base `bookstore`)
+
+Segundo plano: `docker compose up --build -d` · Detener: `docker compose down`
+
+---
+
 ## Variables de entorno
 
 | Archivo | Origen | Propósito |
@@ -130,21 +145,6 @@ Los cuerpos JSON van en **camelCase** (DTOs de Nest).
 `POST http://localhost:3000/books/1/calculate-price`  
 
 Sin body. Usa `cost_usd` del libro, tasa USD→moneda local y guarda `selling_price_local`. Si falla la API externa, entra en juego `FALLBACK_RATES_JSON`.
-
----
-
-## Docker
-
-Con **Docker Desktop** abierto, en la raíz del proyecto:
-
-```sh
-docker compose up --build
-```
-
-- API: **http://localhost:3000** — Swagger: **http://localhost:3000/api/docs**
-- Postgres en el host: **localhost:5434** (`bookstore` / `bookstore`, base `bookstore`)
-
-Segundo plano: `docker compose up --build -d` · Detener: `docker compose down`
 
 ---
 
